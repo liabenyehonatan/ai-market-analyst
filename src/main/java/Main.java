@@ -1,4 +1,7 @@
+import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.Properties;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,12 +22,19 @@ public class Main {
         String[] symbols= {"SOL/USD", "TSLA", "SPY", "AAPL", "NVDA"};
         JSONObject allData = new JSONObject();
 
+        File oldDataFile = new File("daily_data.json");
+
         try (HttpClient client = HttpClient.newHttpClient()) {
+            JSONObject oldData = null;
+            if (oldDataFile.exists()) {
+                String oldContent = new String(Files.readAllBytes(oldDataFile.toPath()));
+                oldData = new JSONObject(oldContent);
+            }
+
             for (String symbol : symbols){
                 String url= "https://api.twelvedata.com/quote?symbol=" + symbol +"&apikey=" + apiKey;
 
                 HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 JSONObject data = new JSONObject(response.body());
 
@@ -33,6 +43,35 @@ public class Main {
                 boolean isMarketOpen = data.getBoolean("is_market_open");
                 String dataTime = data.getString("datetime");
 
+                  if (oldData != null) {
+                    JSONObject oldStockData = oldData.getJSONObject(symbol);
+                    String predictedTrend = oldStockData.getString("trend");
+
+                      double changeNumber = Double.parseDouble(change);
+                      boolean wasCorrect;
+
+                      if (predictedTrend.equals("Bullish") && changeNumber >= 0) {
+                          wasCorrect = true;
+                      } else if (predictedTrend.equals("Bearish") && changeNumber < 0) {
+                          wasCorrect = true;
+                      } else if (predictedTrend.equals("Neutral")) {
+                          wasCorrect = true;
+                      } else {
+                          wasCorrect = false;
+                      }
+
+                      JSONObject logEntry = new JSONObject();
+                      logEntry.put("date", dataTime);
+                      logEntry.put("symbol", symbol);
+                      logEntry.put("predicted_trend", predictedTrend);
+                      logEntry.put("actual_percent_change", change);
+                      logEntry.put("was_correct", wasCorrect);
+
+                      FileWriter logFile = new FileWriter("accuracy_log.jsonl", true);
+                      logFile.write(logEntry.toString() + "\n");
+                      logFile.close();
+
+                }
                 JSONObject stockData = new JSONObject();
                 stockData.put("price", price);
                 stockData.put("percent_change", change);
@@ -105,6 +144,63 @@ public class Main {
         FileWriter file = new FileWriter("daily_data.json");
         file.write(allData.toString());
         file.close();
+
+        String tableRows = "";
+
+        for (String symbol : allData.keySet()) {
+            JSONObject stockData = allData.getJSONObject(symbol);
+            String price = stockData.getString("price");
+            String trend = stockData.getString("trend");
+            String analysis = stockData.getString("analysis");
+
+            tableRows += "<tr><td>" + symbol + "</td><td>" + price + "</td><td>" + trend + "</td><td>" + analysis + "</td></tr>\n";
+        }
+
+        int totalPredictions = 0;
+        int correctPredictions = 0;
+
+        File logFile = new File("accuracy_log.jsonl");
+        if (logFile.exists()) {
+            List<String> lines = Files.readAllLines(logFile.toPath());
+
+            for (String line : lines) {
+                JSONObject entry = new JSONObject(line);
+                totalPredictions++;
+                if (entry.getBoolean("was_correct")) {
+                    correctPredictions++;
+                }
+            }
+        }
+
+        double accuracyPercent = 0;
+        if (totalPredictions > 0) {
+            accuracyPercent = (double) correctPredictions / totalPredictions * 100;
+        }
+        String html = "<html><head><title>AI Market Analyst Report</title>"
+                + "<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>"
+                + "<style>table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ccc; padding: 8px; text-align: right; }</style>"
+                + "</head><body>"
+                + "<h1>AI Market Analyst - Daily Report</h1>"
+                + "<p><b>Disclaimer:</b> This tool is for educational/analytical purposes only, not investment advice.</p>"
+                + "<h2>Today's Data</h2>"
+                + "<table><tr><th>Symbol</th><th>Price</th><th>Trend</th><th>Analysis</th></tr>"
+                + tableRows
+                + "</table>"
+                + "<h2>Prediction Accuracy: " + String.format("%.1f", accuracyPercent) + "% (" + correctPredictions + "/" + totalPredictions + ")</h2>"
+                + "<div style=\"max-width: 400px;\">"
+                + "<canvas id=\"accuracyChart\"></canvas>"
+                + "</div>"
+                + "<script>"
+                + "new Chart(document.getElementById('accuracyChart'), {"
+                + "type: 'doughnut',"
+                + "data: { labels: ['Correct', 'Incorrect'], datasets: [{ data: [" + correctPredictions + ", " + (totalPredictions - correctPredictions) + "], backgroundColor: ['#4CAF50', '#f44336'] }] }"
+                + "});"
+                + "</script>"
+                + "</body></html>";
+
+        FileWriter reportFile = new FileWriter("report.html");
+        reportFile.write(html);
+        reportFile.close();
 
 
 
