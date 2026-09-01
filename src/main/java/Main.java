@@ -91,6 +91,8 @@ public class Main {
             }
 
             DataStore.saveDailyData(allData);
-        }
+         } else {
+        allData = oldData;
+    }
         report.ReportGenerator.generate(allData);
     }}
