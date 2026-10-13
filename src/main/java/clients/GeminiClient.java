@@ -10,8 +10,7 @@ import org.json.JSONObject;
 public class GeminiClient {
 
     public static JSONArray fetchAnalysis(HttpClient client, String apiKey, JSONObject allData) throws Exception {
-        String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-
+        String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
         String prompt = "You are an expert financial analyst. I will provide you with a JSON containing stock market data. Analyze all available fields. For each stock, determine the current market trend. Base your prediction on the expected trend through the next trading day's close. Return your response STRICTLY as a valid JSON array of objects, with no additional text or Markdown blocks. Each object must follow this structure: {\"symbol\": \"...\", \"trend\": \"Bullish/Bearish/Neutral\", \"analysis\": \"2-3 sentence explanation\"}. Here is the data: " + allData.toString();
 
         JSONObject part = new JSONObject();
@@ -32,12 +31,18 @@ public class GeminiClient {
         HttpRequest geminiRequest = HttpRequest.newBuilder()
                 .uri(URI.create(geminiUrl))
                 .header("Content-Type", "application/json")
+                .header("x-goog-api-key", apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                 .build();
 
         HttpResponse<String> geminiResponse = client.send(geminiRequest, HttpResponse.BodyHandlers.ofString());
 
         JSONObject geminiData = new JSONObject(geminiResponse.body());
+
+        if (!geminiData.has("candidates")) {
+            throw new RuntimeException("Gemini error: " + geminiResponse.body());
+        }
+
         JSONArray candidates = geminiData.getJSONArray("candidates");
         JSONObject firstCandidate = candidates.getJSONObject(0);
         JSONObject candidateContent = firstCandidate.getJSONObject("content");
@@ -46,6 +51,9 @@ public class GeminiClient {
         String analysisText = firstPart.getString("text");
         analysisText = analysisText.replace("```json", "").replace("```", "").trim();
 
-        return new JSONArray(analysisText);
-    }
+        try {
+            return new JSONArray(analysisText);
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini returned invalid JSON: " + analysisText, e);
+        }}
 }

@@ -14,6 +14,12 @@ public class TwelveDataClient {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        return new JSONObject(response.body());
+        JSONObject data = new JSONObject(response.body());
+
+        if (!data.has("close")) {
+            throw new RuntimeException("Twelve Data error for " + symbol + ": " + data.optString("message", "unknown error"));
+        }
+
+        return data;
     }
 }
