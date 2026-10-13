@@ -1,7 +1,7 @@
 # AI Market Analyst: can an LLM predict daily market moves?
 
 ![Daily run](https://github.com/liabenyehonatan/ai-market-analyst/actions/workflows/daily.yml/badge.svg)
-
+![Daily report](docs/report.png)
 A daily experiment that logs an LLM's trend calls on five assets and scores them against what the market actually did. Not investment advice.
 
 ## The question
