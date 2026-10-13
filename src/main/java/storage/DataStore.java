@@ -28,6 +28,9 @@ public class DataStore {
         if (oldData == null) {
             return true;
         }
+        if (!oldData.has(symbols[0])) {
+            return true;
+        }
         JSONObject firstStock = oldData.getJSONObject(symbols[0]);
         if (!firstStock.has("checked_at")) {
             return true;

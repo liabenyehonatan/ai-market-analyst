@@ -84,7 +84,7 @@ public class Main {
                     String analyzedSymbol = oneAnalysis.getString("symbol");
                     String trend = oneAnalysis.getString("trend");
                     String analysis = oneAnalysis.getString("analysis");
-
+                    if (!allData.has(analyzedSymbol)) continue;
                     JSONObject existingStockData = allData.getJSONObject(analyzedSymbol);
                     existingStockData.put("trend", trend);
                     existingStockData.put("analysis", analysis);

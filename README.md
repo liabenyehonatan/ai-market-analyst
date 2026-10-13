@@ -31,6 +31,7 @@ Running since October 13, 2026. I am not publishing an accuracy number yet: with
 
 - Five assets, one prediction a day, so the results will be noisy for a long time.
 - The model only sees the latest day's price and change, so the call is close to one-day momentum.
+- Crypto trades 24/7, so SOL/USD is scored against a partial-day move (the quote is taken at 06:30 UTC), while stocks are scored against a full trading day. The two are not directly comparable.
 
 ## How I built it
 

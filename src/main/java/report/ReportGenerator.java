@@ -19,8 +19,8 @@ public class ReportGenerator {
             JSONObject stockData = allData.getJSONObject(symbol);
             String price = String.format(java.util.Locale.US, "%.2f", Double.parseDouble(stockData.getString("price")));
             String percentChange = stockData.getString("percent_change");
-            String trend = stockData.getString("trend");
-            String analysis = stockData.getString("analysis");
+            String trend = stockData.optString("trend", "n/a");
+            String analysis = stockData.optString("analysis", "No analysis returned");
 
             double changeValue = Double.parseDouble(percentChange);
             String changeColor = changeValue >= 0 ? "green" : "red";
