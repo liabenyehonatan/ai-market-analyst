@@ -1,23 +1,45 @@
-# AI Market Analyst
+# AI Market Analyst: can an LLM predict daily market moves?
 
-A system demonstrating AI implementation on real-time financial market data: fetching live stock and crypto prices, running automated AI trend analysis, and tracking prediction accuracy over time.
+![Daily run](https://github.com/liabenyehonatan/ai-market-analyst/actions/workflows/daily.yml/badge.svg)
 
-**Disclaimer:** This is an educational/analytical tool only. It does not constitute investment advice.
+A daily experiment that logs an LLM's trend calls on five assets and scores them against what the market actually did. Not investment advice.
 
-## What it does
-1. Fetches real-time price data for 5 assets (NVDA, AAPL, TSLA, SPY, SOL/USD) via the Twelve Data API
-2. Sends the data to the Gemini API for trend analysis (Bullish/Bearish/Neutral)
-3. Compares yesterday's prediction against today's actual result, logging it to a cumulative accuracy tracker
-4. Generates an HTML report with a color-coded data table, an accuracy chart, and a breakdown of incorrect predictions
+## The question
+
+Given a day's price data, can a language model call tomorrow's direction (Bullish, Bearish or Neutral) better than a simple rule can? Before relying on an LLM for a decision, I wanted to know how often it is right, so I built a way to measure it.
 
 ## How it works
-- Java 21, Maven
-- Twelve Data API for prices, Gemini API for analysis
-- API keys stored in `.env` (excluded from Git)
-- Designed to run once per day, ideally via a scheduled task (e.g. cron) — a built-in timing check skips redundant runs within a 20-hour window
-- Data is currently stored in flat files (JSON / JSON Lines); a production version would use a database (e.g. PostgreSQL) to support querying and larger scale
 
-## Running it
-1. Add a `.env` file with `TWELVE_DATA_API_KEY` and `GEMINI_API_KEY`
-2. Run `Main.java`
-3. Open `report.html` in a browser
+Every day, a GitHub Actions job:
+
+1. Pulls quotes for NVDA, AAPL, TSLA, SPY and SOL/USD from Twelve Data.
+2. Asks Gemini for a trend call on each one.
+3. Scores yesterday's call against what the market actually did, and appends it to `data/accuracy_log.jsonl`.
+4. Commits the new data to this repo, so every prediction has a timestamp in the git history.
+
+## Decisions
+
+- **Neutral counts as correct only if the move was within ±0.5%.** My first version marked every Neutral as correct, which inflated the accuracy. The 0.5% is a threshold I chose by hand.
+- **Stale data is skipped.** On weekends the stock quotes do not change, so those days are not scored.
+- **No backfilling.** The model already knows what happened in the past, so predictions for past dates would not be a test.
+
+## Status
+
+Running since October 13, 2026. I am not publishing an accuracy number yet: with one prediction per asset per day, the sample is too small to mean anything. I will report results at 30+ predictions per asset, next to simple baselines such as "same direction as yesterday".
+
+## Limitations
+
+- Five assets, one prediction a day, so the results will be noisy for a long time.
+- The model only sees the latest day's price and change, so the call is close to one-day momentum.
+
+## How I built it
+
+I had some prior experience working with LLM responses in code from a course, and I wanted to build a full Java project that talks to live market APIs and tracks its own performance over time.
+
+I set the scope, picked the assets, decided to measure accuracy instead of just predicting, and switched from Alpha Vantage to Twelve Data when I hit rate limits on the free tier. I used Claude for starter code and debugging, and I ran, tested and connected everything myself.
+
+In October a review with Claude turned up two bugs in how results were scored: Neutral predictions were always counted as correct, and weekend data was compared against a quote that had not changed. I fixed both, added error handling so one failing symbol does not stop the run, and set up the daily run.
+
+## Run it
+
+Java 21 and Maven. Set `TWELVE_DATA_API_KEY` and `GEMINI_API_KEY` (as environment variables or in a `.env` file), run `Main.java`, and open `report.html`.
