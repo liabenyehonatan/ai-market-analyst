@@ -115,3 +115,4 @@
 {"date":"2026-11-13","symbol":"SPY","was_correct":true,"actual_percent_change":"-0.092454977","predicted_trend":"Neutral"}
 {"date":"2026-11-13","symbol":"AAPL","was_correct":false,"actual_percent_change":"1.34975","predicted_trend":"Neutral"}
 {"date":"2026-11-13","symbol":"NVDA","was_correct":true,"actual_percent_change":"-2.17823","predicted_trend":"Bearish"}
+{"date":"2026-11-14","symbol":"SOL/USD","was_correct":false,"actual_percent_change":"-3.47871","predicted_trend":"Neutral"}
