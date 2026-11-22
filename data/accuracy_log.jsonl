@@ -138,3 +138,4 @@
 {"date":"2026-11-20","symbol":"AAPL","was_correct":true,"actual_percent_change":"-0.12885985","predicted_trend":"Bearish"}
 {"date":"2026-11-20","symbol":"NVDA","was_correct":false,"actual_percent_change":"-5.96657","predicted_trend":"Bullish"}
 {"date":"2026-11-21","symbol":"SOL/USD","was_correct":false,"actual_percent_change":"2.62776","predicted_trend":"Bearish"}
+{"date":"2026-11-22","symbol":"SOL/USD","was_correct":true,"actual_percent_change":"0.14222728","predicted_trend":"Bullish"}
