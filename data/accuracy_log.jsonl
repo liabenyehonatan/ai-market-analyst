@@ -150,3 +150,8 @@
 {"date":"2026-11-25","symbol":"AAPL","was_correct":false,"actual_percent_change":"-0.69760422","predicted_trend":"Bullish"}
 {"date":"2026-11-25","symbol":"NVDA","was_correct":true,"actual_percent_change":"-7.17596","predicted_trend":"Bearish"}
 {"date":"2026-11-26","symbol":"SOL/USD","was_correct":false,"actual_percent_change":"0.82304527","predicted_trend":"Neutral"}
+{"date":"2026-11-27","symbol":"SOL/USD","was_correct":true,"actual_percent_change":"1.85837","predicted_trend":"Bullish"}
+{"date":"2026-11-27","symbol":"TSLA","was_correct":false,"actual_percent_change":"5.36118","predicted_trend":"Bearish"}
+{"date":"2026-11-27","symbol":"SPY","was_correct":false,"actual_percent_change":"1.52783","predicted_trend":"Neutral"}
+{"date":"2026-11-27","symbol":"AAPL","was_correct":false,"actual_percent_change":"0.79869890","predicted_trend":"Neutral"}
+{"date":"2026-11-27","symbol":"NVDA","was_correct":false,"actual_percent_change":"0.10716473","predicted_trend":"Bearish"}
